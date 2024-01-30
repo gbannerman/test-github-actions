@@ -1,51 +1,18 @@
 name: CD
 
-on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
+on: push
 
 jobs:
   deploy:
-    name: Example deploy
-    environment: example-environment
+    name: Example
     runs-on: ubuntu-latest
     steps:
       - name: Hello
         run: |
           echo "Hello World!"
 
-  compare_shas:
-    name: Get last deployment
+  generate_cat:
     needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v6
-        env:
-          GITHUB_CONTEXT_SHA: ${{ github.sha }}
-          GITHUB_HEAD_REF: ${{ github.head_ref }}
-        with:
-          script: |
-            const { GITHUB_CONTEXT_SHA, GITHUB_HEAD_REF } = process.env;
-
-            const result = await github.rest.repos.listDeployments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              environment: "example-environment",
-              per_page: 1,
-            });
-
-            const githubScriptSha = context.sha;
-            const githubContextSha = GITHUB_CONTEXT_SHA;
-
-            const refSections = GITHUB_HEAD_REF.split("/");
-            const branch = refSections[refSections.length - 1];
-
-            const latestDeploy = result.data[0];
-            const currentDeployIsLatest = latestDeploy.sha === branch;
-
-            console.warn(`githubScriptSha: ${githubScriptSha}`);
-            console.warn(`githubContextSha: ${githubContextSha}`);
-            console.warn(`deploymentSha: ${latestDeploy.sha}`);
+    uses: Administrate/github-actions/.github/workflows/generate_cat.yml@PLAT-23311-stop-generating-CATs
+    name: Generate CAT
+    secrets: inherit
